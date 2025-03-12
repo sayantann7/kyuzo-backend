@@ -14,7 +14,6 @@ const host = process.env.FRONTEND_HOST;
 const MongoStore = require("connect-mongo");
 const mongoURI = process.env.MONGODB_URI;
 const quizResultModel = require("./models/quizResults");
-const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -321,60 +320,6 @@ app.post("/sendFriendRequestByUsername", async (req, res) => {
   } catch (error) {
     console.error("Error sending friend request:", error);
     res.status(500).json({ error: "An error occurred while sending the friend request" });
-  }
-});
-
-app.post("/generateQuiz", async (req, res) => {
-  try {
-    const { topic, numberOfQuestions, difficulty, userId } = req.body;
-
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-8b" });
-
-    const prompt = `Generate a quiz with the following details:
-    Topic: ${topic}
-    Number of Questions: ${numberOfQuestions}
-    Difficulty: ${difficulty}
-    Format: Each question should have an id, question text, options (with ids and text), and a correct option id. The quiz should also have a title, description, category, difficulty, duration, tags, isPublic, and createdBy fields.
-    Example:
-    {
-      title: "Sample Quiz",
-      description: "This is a sample quiz",
-      category: "${topic}",
-      difficulty: "${difficulty}",
-      duration: 10,
-      tags: ["sample", "quiz"],
-      isPublic: true,
-      questions: [
-        {
-          id: "1",
-          question: "Sample question?",
-          options: [
-            { id: "a", text: "Option A" },
-            { id: "b", text: "Option B" },
-            { id: "c", text: "Option C" },
-            { id: "d", text: "Option D" }
-          ],
-          correctOptionId: "a"
-        }
-      ],
-      createdBy: "${userId}"
-    }`;
-
-    const result = await model.generateContent(prompt);
-    // const quizData = JSON.parse(result.response.candidates[0].content.parts[0].text);
-
-    console.log(result);
-
-    // const newQuiz = new quizModel(quizData);
-    // await newQuiz.save();
-    // await updateUserXPAndLevel(userId, 2); // Add 2 XP for creating a quiz
-    // await updateDailyStreak(userId);
-
-    res.status(201).json({ success: "Quiz generated successfully", quizId: "8322058215" });
-  } catch (error) {
-    console.error("Error generating quiz:", error);
-    res.status(500).json({ error: "An error occurred while generating the quiz" });
   }
 });
 
